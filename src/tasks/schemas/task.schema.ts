@@ -21,10 +21,25 @@ export class Task {
   priority: number;
 
   @Prop()
-  assignedTo: string;
+  assignedTo?: string;
 
   @Prop({ default: false })
   isCompleted: boolean;
+
+  @Prop({ required: true })
+  createdBy: string;
+
+  @Prop({ required: true })
+  orgId: string;
+
+  @Prop()
+  projectId?: string;
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task); 
+
+TaskSchema.index({ status: 1 });
+TaskSchema.index({ assignedTo: 1 });
+TaskSchema.index({ dueDate: 1 });
+TaskSchema.index({ createdBy: 1 });
+TaskSchema.index({ orgId: 1 });

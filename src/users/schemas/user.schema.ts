@@ -14,8 +14,23 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  @Prop({ default: 'user' })
-  role: string;
+  @Prop({ required: true, enum: ['owner', 'senior', 'junior'], default: 'junior' })
+  role: 'owner' | 'senior' | 'junior';
+
+  @Prop({ required: true })
+  orgId: string;
+
+  @Prop({ required: false })
+  designationId?: string;
+
+  // For juniors, who they report to (a senior)
+  @Prop({ required: false })
+  managerId?: string;
 }
 
-export const UserSchema = SchemaFactory.createForClass(User); 
+export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.index({ orgId: 1 });
+UserSchema.index({ role: 1 });
+UserSchema.index({ managerId: 1 });
+

@@ -1,6 +1,6 @@
 # Task Manager Backend
 
-A scalable NestJS backend for managing tasks with MongoDB integration.
+A scalable NestJS backend for managing tasks with MongoDB integration, JWT auth, validation, and Swagger docs.
 
 ## Features
 
@@ -11,6 +11,15 @@ A scalable NestJS backend for managing tasks with MongoDB integration.
 - Due date tracking
 - Swagger API documentation
 - Comprehensive test coverage
+- Role-aware access control (creator/assignee vs admin)
+- Rate limiting, health checks, consistent error responses
+
+## What problem this solves (practical)
+
+- Central place for teams to know “who’s doing what, by when.”
+- Secure multi-user task API with ownership and roles so only the right people can see/change tasks.
+- Reliable integration surface (Swagger, validation, error shaping, health checks, rate limiting) for frontends or other services.
+- Keeps task data clean (future due dates, completion ties to status) and queryable (filters, pagination, indexes) for dashboards and reporting.
 
 ## Prerequisites
 
@@ -31,11 +40,12 @@ cd task-manager
 npm install
 ```
 
-3. Create a `.env` file in the root directory with the following content:
+3. Create a `.env` file in the root directory (values can be overridden per environment):
 ```
 MONGODB_URI=mongodb://localhost:27017/task-manager
 PORT=3000
 NODE_ENV=development
+JWT_SECRET=dev_jwt_secret
 ```
 
 ## Running the Application
@@ -78,15 +88,25 @@ npm run test:cov
 
 ## API Endpoints
 
+### Auth
+- `POST /auth/register` - Create a user
+- `POST /auth/login` - Login with email/password (returns JWT)
+
 ### Tasks
+All task routes require a Bearer JWT.
 
 - `POST /tasks` - Create a new task
-- `GET /tasks` - Get all tasks
-- `GET /tasks?status=<status>` - Get tasks by status
-- `GET /tasks?assignedTo=<email>` - Get tasks by assignee
+- `GET /tasks` - Get tasks (supports `status`, `assignedTo`, `page`, `limit`, `sortBy`, `sortOrder`, `search`)
 - `GET /tasks/:id` - Get a specific task
 - `PATCH /tasks/:id` - Update a task
 - `DELETE /tasks/:id` - Delete a task
+
+Ownership/permissions:
+- Admins see all tasks.
+- Regular users see tasks they created or are assigned to; they can update/delete only those.
+
+### Health
+- `GET /health` - Liveness probe
 
 ## Task Schema
 
@@ -94,13 +114,22 @@ npm run test:cov
 {
   title: string;          // Required
   description?: string;   // Optional
-  status: string;        // Required (TODO, IN_PROGRESS, DONE)
-  dueDate: Date;         // Required
-  priority?: number;     // Optional (1-5)
-  assignedTo?: string;   // Optional
-  isCompleted: boolean;  // Default: false
+  status: string;         // Required (TODO, IN_PROGRESS, DONE)
+  dueDate: Date;          // Required (must be future)
+  priority?: number;      // Optional (1-5)
+  assignedTo?: string;    // Optional (email)
+  isCompleted: boolean;   // Derived from status
+  createdBy: string;      // User id of creator
 }
 ```
+
+## Platform features
+- JWT auth with password hashing, local and JWT strategies
+- Per-user task ownership checks (admin bypass)
+- Rate limiting (global): 100 req/min default
+- Global validation + consistent error envelope
+- Swagger at `/api`
+- Health endpoint at `/health`
 
 ## Contributing
 
