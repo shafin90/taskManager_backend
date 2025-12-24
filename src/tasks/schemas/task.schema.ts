@@ -34,6 +34,12 @@ export class Task {
 
   @Prop()
   projectId?: string;
+
+  @Prop()
+  parentTaskId?: string;
+
+  @Prop()
+  estimatedHours?: number;
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task); 

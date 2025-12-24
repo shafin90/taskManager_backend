@@ -24,7 +24,7 @@ export class TasksService {
   constructor(
     @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
     private usersService: UsersService,
-  ) {}
+  ) { }
 
   async create(createTaskDto: CreateTaskDto, user: AuthUser): Promise<Task> {
     this.ensureDueDateIsFuture(createTaskDto.dueDate);
@@ -69,6 +69,10 @@ export class TasksService {
           { description: { $regex: search, $options: 'i' } },
         ],
       });
+    }
+
+    if (query.parentTaskId) {
+      andFilters.push({ parentTaskId: query.parentTaskId });
     }
 
     const accessFilter = await this.buildAccessFilter(user);

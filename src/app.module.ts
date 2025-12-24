@@ -11,6 +11,7 @@ import { OrgsModule } from './orgs/orgs.module';
 import { DesignationsModule } from './designations/designations.module';
 import { TargetsModule } from './targets/targets.module';
 import { ChatModule } from './chat/chat.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { ChatModule } from './chat/chat.module';
     DesignationsModule,
     TargetsModule,
     ChatModule,
+    ReportsModule,
   ],
   providers: [
     {
@@ -61,5 +63,5 @@ import { ChatModule } from './chat/chat.module';
   ],
   controllers: [HealthController],
 })
-export class AppModule {}
+export class AppModule { }
 

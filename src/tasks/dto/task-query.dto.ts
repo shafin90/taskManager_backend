@@ -35,5 +35,9 @@ export class TaskQueryDto {
   @IsString()
   @Transform(({ value }) => value?.trim())
   search?: string;
+
+  @IsString()
+  @IsOptional()
+  parentTaskId?: string;
 }
 

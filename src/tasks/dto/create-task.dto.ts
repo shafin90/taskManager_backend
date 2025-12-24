@@ -40,5 +40,14 @@ export class CreateTaskDto {
   @IsString()
   @IsOptional()
   assignedTo?: string;
+
+  @IsString()
+  @IsOptional()
+  parentTaskId?: string;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  estimatedHours?: number;
 }
 

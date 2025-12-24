@@ -3,12 +3,19 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { SecurityMiddleware } from './common/middleware/security.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Enable CORS
-  app.enableCors();
+  // Enable CORS with security restrictions
+  app.enableCors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    credentials: true,
+  });
+
+  // Apply security middleware
+  // app.use(securityMiddleware.use.bind(securityMiddleware));
 
   // Enable validation with auto-transformation and whitelisting
   app.useGlobalPipes(
@@ -16,6 +23,7 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       transformOptions: { enableImplicitConversion: true },
+      forbidNonWhitelisted: true, // Reject requests with non-whitelisted properties
     }),
   );
 
@@ -37,4 +45,4 @@ async function bootstrap() {
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}`);
 }
-bootstrap();
+bootstrap(); // Start server
