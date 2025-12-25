@@ -63,4 +63,18 @@ export class ReportsService {
             }
         ]);
     }
+
+    async getUserStats(userId: string) {
+        const stats = await this.reportModel.aggregate([
+            { $match: { responderId: userId, status: 'REVIEWED' } },
+            {
+                $group: {
+                    _id: null,
+                    avgGrade: { $avg: '$grade' },
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+        return stats.length > 0 ? stats[0] : { avgGrade: 0, count: 0 };
+    }
 }

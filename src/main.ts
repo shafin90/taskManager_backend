@@ -15,7 +15,8 @@ async function bootstrap() {
   });
 
   // Apply security middleware
-  // app.use(securityMiddleware.use.bind(securityMiddleware));
+  const securityMiddleware = new SecurityMiddleware();
+  app.use(securityMiddleware.use.bind(securityMiddleware));
 
   // Enable validation with auto-transformation and whitelisting
   app.useGlobalPipes(

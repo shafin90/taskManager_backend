@@ -1,15 +1,22 @@
-import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, UseGuards, Inject, forwardRef } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { Param, Patch } from '@nestjs/common';
+import { TasksService } from '../tasks/tasks.service';
+import { ReportsService } from '../reports/reports.service';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    @Inject(forwardRef(() => TasksService))
+    private readonly tasksService: TasksService,
+    private readonly reportsService: ReportsService,
+  ) { }
 
   @Post()
   @Roles('owner')
@@ -36,6 +43,17 @@ export class UsersController {
   @Roles('senior')
   getMyJuniors(@Request() req) {
     return this.usersService.findJuniorsForSenior(req.user.userId, req.user.orgId);
+  }
+
+  @Get(':id/stats')
+  @Roles('owner', 'senior')
+  async getEmployeeStats(@Param('id') userId: string) {
+    // Only owner or manager (senior) can view stats - for now owner/senior check is generic
+    const [taskStats, reportStats] = await Promise.all([
+      this.tasksService.getUserStats(userId),
+      this.reportsService.getUserStats(userId)
+    ]);
+    return { ...taskStats, ...reportStats };
   }
 }
 

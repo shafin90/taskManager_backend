@@ -99,6 +99,15 @@ export class TasksService {
     return { data, total, page, limit };
   }
 
+  async getUserStats(userId: string) {
+    const [total, completed, inProgress] = await Promise.all([
+      this.taskModel.countDocuments({ assignedTo: userId }),
+      this.taskModel.countDocuments({ assignedTo: userId, status: 'DONE' }),
+      this.taskModel.countDocuments({ assignedTo: userId, status: 'IN_PROGRESS' })
+    ]);
+    return { total, completed, inProgress };
+  }
+
   async findOne(id: string, user: AuthUser): Promise<Task> {
     const task = await this.taskModel.findById(id).lean().exec();
     if (!task) {
